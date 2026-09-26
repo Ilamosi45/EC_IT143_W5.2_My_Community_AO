@@ -12,7 +12,6 @@ Version   Date         Author           Description
 
 -- DISCLAIMER: Ensure your target database context is selected before executing.
 -- USE MyDatabaseName;
--- GO
 
 
 -- ===============================================================================================================
@@ -39,7 +38,6 @@ GROUP BY
     p.product_id, p.product_name, p.category, p.current_stock_level
 ORDER BY 
     total_revenue DESC;
-GO
 
 
 -- ===============================================================================================================
@@ -73,7 +71,6 @@ SELECT
     LAG(CAST(net_profit AS FLOAT) / NULLIF(total_sales, 0) * 100) OVER (PARTITION BY branch_name ORDER BY sales_year, sales_month) AS prev_month_margin
 FROM 
     MonthlyFinancials;
-GO
 
 
 -- ===============================================================================================================
@@ -97,7 +94,6 @@ GROUP BY
     customer_segment
 ORDER BY 
     average_lifetime_value DESC;
-GO
 
 
 -- ===============================================================================================================
@@ -119,4 +115,3 @@ GROUP BY
     DATENAME(weekday, order_date), DATEPART(weekday, order_date)
 ORDER BY 
     DATEPART(weekday, order_date);
-GO
