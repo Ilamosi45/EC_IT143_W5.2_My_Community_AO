@@ -12,7 +12,6 @@ Version   Date         Author           Description
 
 -- DISCLAIMER: Ensure your target database context is selected before executing.
 -- USE MyDatabaseName;
--- GO
 
 
 -- ===============================================================================================================
@@ -39,7 +38,6 @@ WHERE
     t.season = 'This Season'
 GROUP BY 
     t.tournament_name;
-GO
 
 
 -- ===============================================================================================================
@@ -67,7 +65,6 @@ GROUP BY
         WHEN gold_diff_at_10_min BETWEEN 0 AND 2000 THEN 'Slight Advantage (0-2k)'
         ELSE 'Deficit (<0)'
     END;
-GO
 
 
 -- ===============================================================================================================
@@ -91,7 +88,6 @@ GROUP BY
     content_type
 ORDER BY 
     total_new_followers DESC;
-GO
 
 
 -- ===============================================================================================================
@@ -116,4 +112,3 @@ HAVING
     COUNT(match_id) >= 5
 ORDER BY 
     win_rate_percentage DESC;
-GO
