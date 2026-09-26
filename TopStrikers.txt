@@ -1,0 +1,119 @@
+/*****************************************************************************************************************
+NAME:        EC_IT143_W5.2_TopStrikers_AO.sql
+PURPOSE:     Final Project: My Communities Analysis — Create Answers for TopStrikers
+AUTHOR:      Andrew Ogege
+DATE:        September 26, 2026
+
+CHANGELOG:
+Version   Date         Author           Description
+-------   ----------   --------------   ------------------------------------------------------------------
+1.0       09/26/2026   AOgege           Initial script creation with 4 questions and answers.
+*****************************************************************************************************************/
+
+-- DISCLAIMER: Ensure your target database context is selected before executing.
+-- USE MyDatabaseName;
+-- GO
+
+
+-- ===============================================================================================================
+-- QUESTION 1
+-- Original Author: Team Manager
+-- Description:     What is the average operational cost (travel, gear, food) per tournament match, 
+--                  and how does it compare to our prize money revenue this season?
+-- ===============================================================================================================
+
+-- Q1 Answer SQL Statement:
+SELECT 
+    t.tournament_name,
+    COUNT(m.match_id) AS total_matches,
+    SUM(c.travel_cost + c.gear_cost + c.food_cost) AS total_operational_cost,
+    AVG(c.travel_cost + c.gear_cost + c.food_cost) AS avg_cost_per_match,
+    SUM(r.prize_money_amount) AS total_prize_revenue,
+    (SUM(r.prize_money_amount) - SUM(c.travel_cost + c.gear_cost + c.food_cost)) AS net_profit_loss
+FROM 
+    dbo.Tournaments t
+INNER JOIN dbo.Matches m ON t.tournament_id = m.tournament_id
+LEFT JOIN dbo.OperationalCosts c ON m.match_id = c.match_id
+LEFT JOIN dbo.PrizeRevenue r ON t.tournament_id = r.tournament_id
+WHERE 
+    t.season = 'This Season'
+GROUP BY 
+    t.tournament_name;
+GO
+
+
+-- ===============================================================================================================
+-- QUESTION 2
+-- Original Author: Team Captain
+-- Description:     How does our early-game gold/resource advantage correlate with our final win rate, 
+--                  and at what minute mark do we usually lose momentum if we drop behind?
+-- ===============================================================================================================
+
+-- Q2 Answer SQL Statement:
+SELECT 
+    CASE 
+        WHEN gold_diff_at_10_min > 2000 THEN 'High Advantage (>2k)'
+        WHEN gold_diff_at_10_min BETWEEN 0 AND 2000 THEN 'Slight Advantage (0-2k)'
+        ELSE 'Deficit (<0)'
+    END AS early_game_status,
+    COUNT(match_id) AS total_games,
+    SUM(CASE WHEN match_result = 'Win' THEN 1 ELSE 0 END) AS total_wins,
+    CAST(SUM(CASE WHEN match_result = 'Win' THEN 1 ELSE 0 END) AS FLOAT) / COUNT(match_id) * 100 AS win_rate_percentage
+FROM 
+    dbo.MatchTelemetry
+GROUP BY 
+    CASE 
+        WHEN gold_diff_at_10_min > 2000 THEN 'High Advantage (>2k)'
+        WHEN gold_diff_at_10_min BETWEEN 0 AND 2000 THEN 'Slight Advantage (0-2k)'
+        ELSE 'Deficit (<0)'
+    END;
+GO
+
+
+-- ===============================================================================================================
+-- QUESTION 3
+-- Original Author: Social Media Manager
+-- Description:     Which types of content (match highlights, behind-the-scenes vlogs, or player streams) 
+--                  generate the highest fan engagement and new followers?
+-- ===============================================================================================================
+
+-- Q3 Answer SQL Statement:
+SELECT 
+    content_type,
+    COUNT(post_id) AS total_posts,
+    AVG(likes + comments + shares) AS avg_engagement_per_post,
+    SUM(new_followers_gained) AS total_new_followers
+FROM 
+    dbo.SocialMediaMetrics
+WHERE 
+    content_type IN ('Match Highlights', 'Behind-the-scenes Vlogs', 'Player Streams')
+GROUP BY 
+    content_type
+ORDER BY 
+    total_new_followers DESC;
+GO
+
+
+-- ===============================================================================================================
+-- QUESTION 4 
+-- Original Author: Joshua Asuquo
+-- Description:     What is the win-rate percentage when selecting specific in-game characters on different maps?
+-- ===============================================================================================================
+
+-- Q4 Answer SQL Statement:
+SELECT 
+    character_name,
+    map_name,
+    COUNT(match_id) AS games_played,
+    SUM(CASE WHEN match_result = 'Win' THEN 1 ELSE 0 END) AS total_wins,
+    CAST(SUM(CASE WHEN match_result = 'Win' THEN 1 ELSE 0 END) AS FLOAT) / COUNT(match_id) * 100 AS win_rate_percentage
+FROM 
+    dbo.MatchPerformance
+GROUP BY 
+    character_name, 
+    map_name
+HAVING 
+    COUNT(match_id) >= 5
+ORDER BY 
+    win_rate_percentage DESC;
+GO
